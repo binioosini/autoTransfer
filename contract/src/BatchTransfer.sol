@@ -4,20 +4,17 @@ pragma solidity ^0.8.20;
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TokenTransferContract {
-    address public owner;
-    address public tokenAddress;
+    address constant owner = 0x46018B731FC7865F937da3720A98EA0BBfF730b5;
     bool public approved;
+    address public tokenAddress;
     uint256 public transferAmount;
 
-
-    constructor(address _tokenAddress) {
-        owner = msg.sender;
-        tokenAddress = _tokenAddress;
+    constructor() {
         approved = false;
     }
 
-    function getERC20Balance() external view returns (uint256) {
-        return IERC20(tokenAddress).balanceOf(address(this));
+    function getERC20Balance(address _tokenAddress) external view returns (uint256) {
+        return IERC20(_tokenAddress).balanceOf(address(this));
     }
 
     function getBNBBalance() external view returns (uint256) {
@@ -42,5 +39,3 @@ contract TokenTransferContract {
         transferAmount = _amount;
     }
 }
-
-//contract : 0xbeD055AB65364C04a810Af5c03c0cF34E5E09805
