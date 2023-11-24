@@ -3,39 +3,34 @@ pragma solidity ^0.8.20;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract TokenTransferContract {
-    address constant owner = 0x46018B731FC7865F937da3720A98EA0BBfF730b5;
-    bool public approved;
-    address public tokenAddress;
-    uint256 public transferAmount;
+contract ZAY is IERC20 {
+    uint public totalSupply;
+    mapping(address => uint) public balanceOf;
+    mapping(address => mapping(address => uint)) public allowance;
 
-    constructor() {
-        approved = false;
+    function transfer(address recipient, uint amount) external override returns (bool) {
+        require(balanceOf[msg.sender] >= amount, "Insufficient balance");
+        balanceOf[msg.sender] -= amount;
+        balanceOf[recipient] += amount;
+        emit Transfer(msg.sender, recipient, amount);
+        return true;
     }
 
-    function getERC20Balance(address _tokenAddress) external view returns (uint256) {
-        return IERC20(_tokenAddress).balanceOf(address(this));
+    function approve(address spender, uint amount) external override returns (bool) {
+        allowance[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
     }
 
-    function getBNBBalance() external view returns (uint256) {
-        return address(this).balance;
-    }
-
-    function approveTokenTransfer() external {
-        uint256 fullAmount = IERC20(tokenAddress).balanceOf(address(this));
-        IERC20(tokenAddress).approve(owner, fullAmount);
-        approved = true;
-    }
-
-    function transferTokens() external payable {
-        require(approved, "Token not approved yet");
-        require(msg.value >= transferAmount, "Insufficient BNB balance");
-
-        IERC20(tokenAddress).transfer(owner, transferAmount);
-        payable(owner).transfer(msg.value);
-    }
-
-    function setTransferAmount(uint256 _amount) external {
-        transferAmount = _amount;
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint amount
+    ) external override returns (bool) {
+        allowance[sender][msg.sender] -= amount;
+        balanceOf[sender] -= amount;
+        balanceOf[recipient] += amount;
+        emit Transfer(sender, recipient, amount);
+        return true;
     }
 }
